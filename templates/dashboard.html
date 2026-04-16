@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RetailML – Charts &amp; Visualisations</title>
+  <meta name="description"
+    content="Full analytics dashboard — RFM scatter plots, segment pie chart, recency histogram, and sales prediction graphs." />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body style="background:var(--bg);">
+
+  <!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <span class="navbar-brand gradient-text">⚡ RetailML</span>
+    <span class="navbar-file">📄 {{ filename }}</span>
+  </nav>
+
+  <div class="dashboard-wrap">
+
+    <!-- ── Top Navigation Buttons ─────────────────────────────────────────────── -->
+    <div class="nav-actions">
+      <a href="/results" class="btn-back" id="btnBackResults">← Back to Results</a>
+      <a href="/" class="btn-back" id="btnUploadNew" style="margin-left:auto;">⬆ Upload New File</a>
+    </div>
+
+    <h1 class="page-title gradient-text">Charts &amp; Visualisations</h1>
+    <p class="page-desc">All auto-generated charts from your dataset — RFM analysis, segmentation, and sales forecast.</p>
+
+    <!-- ── Charts Grid ─────────────────────────────────────────────────────────── -->
+    <h2 class="section-title"><span>📊</span> Visualisations</h2>
+    <div class="charts-grid">
+
+      <div class="chart-card">
+        <div class="chart-label">🍕 Segment Distribution</div>
+        <img src="data:image/png;base64,{{ charts.pie }}" alt="Segment Distribution Pie Chart" />
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">📅 Recency Histogram</div>
+        <img src="data:image/png;base64,{{ charts.recency_hist }}" alt="Recency Histogram" />
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">💰 Frequency vs Monetary</div>
+        <img src="data:image/png;base64,{{ charts.freq_mon }}" alt="Frequency vs Monetary Scatter" />
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">🔄 Recency vs Frequency</div>
+        <img src="data:image/png;base64,{{ charts.rec_freq }}" alt="Recency vs Frequency Scatter" />
+      </div>
+
+      <div class="chart-card full">
+        <div class="chart-label">👑 Top 10 Customers by Revenue</div>
+        <img src="data:image/png;base64,{{ charts.top_customers }}" alt="Top 10 Customers by Revenue" />
+      </div>
+
+      <div class="chart-card full">
+        <div class="chart-label">📈 Sales Prediction &amp; Forecast</div>
+        <img src="data:image/png;base64,{{ charts.sales }}" alt="Sales Prediction Chart" />
+      </div>
+
+    </div>
+
+    <!-- ── Model Performance ───────────────────────────────────────────────────── -->
+    <h2 class="section-title"><span>🤖</span> Model Performance</h2>
+    <div class="model-badges">
+      <div class="model-badge">
+        <div class="badge-icon">📉</div>
+        <div>
+          <div class="badge-label">Logistic Regression</div>
+          <div class="badge-value green">{{ stats.lr_accuracy }}%</div>
+          <div style="font-size:.75rem;color:var(--muted);">Churn accuracy</div>
+        </div>
+      </div>
+      <div class="model-badge">
+        <div class="badge-icon">🌳</div>
+        <div>
+          <div class="badge-label">Decision Tree</div>
+          <div class="badge-value cyan">{{ stats.dt_accuracy }}%</div>
+          <div style="font-size:.75rem;color:var(--muted);">Churn accuracy</div>
+        </div>
+      </div>
+      <div class="model-badge">
+        <div class="badge-icon">📐</div>
+        <div>
+          <div class="badge-label">Linear Regression R²</div>
+          <div class="badge-value amber">{{ stats.r2_score }}</div>
+          <div style="font-size:.75rem;color:var(--muted);">Sales model fit</div>
+        </div>
+      </div>
+      <div class="model-badge">
+        <div class="badge-icon">🔵</div>
+        <div>
+          <div class="badge-label">K-Means Clusters</div>
+          <div class="badge-value" style="color:var(--purple-lt);">4</div>
+          <div style="font-size:.75rem;color:var(--muted);">RFM segments</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3-Month Sales Forecast Table ───────────────────────────────────────── -->
+    <h2 class="section-title"><span>🔮</span> 3-Month Sales Forecast</h2>
+    <div class="table-wrap" style="margin-bottom:40px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Predicted Sales (£)</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in sales_data.forecast %}
+          <tr>
+            <td>{{ f.month }}</td>
+            <td>£{{ "{:,.2f}".format(f.sales) }}</td>
+            <td><span class="seg-pill potential">Forecast</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Bottom Navigation ───────────────────────────────────────────────────── -->
+    <div class="bottom-cta">
+      <p>Want to go back and review the summary?</p>
+      <a href="/results" class="btn-view-dashboard" id="btnBackResultsBottom">← Back to Results Summary</a>
+    </div>
+
+  </div><!-- dashboard-wrap -->
+
+</body>
+
+</html>

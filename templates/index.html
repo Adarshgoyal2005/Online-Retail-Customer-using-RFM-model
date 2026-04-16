@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RetailML – Intelligent Customer Analytics</title>
+  <meta name="description"
+    content="Upload your retail dataset and get automated RFM segmentation, sales prediction, and churn analysis powered by machine learning." />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body class="upload-page">
+
+  <!-- Logo -->
+  <div class="upload-logo gradient-text">⚡ RetailML</div>
+  <p class="upload-subtitle">
+    Upload your Excel retail dataset and get instant AI-powered customer insights,
+    sales forecasts, and churn predictions.
+  </p>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class="flash-list" style="max-width:560px;width:100%;">
+    {% for msg in messages %}<li>⚠️ {{ msg }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% endwith %}
+
+  <!-- Upload Card -->
+  <div class="upload-card glass">
+    <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+
+      <div class="drop-zone" id="dropZone">
+        <span class="drop-icon">📊</span>
+        <h3>Drop your data file here</h3>
+        <p>or click to browse &nbsp;·&nbsp; Accepts <strong>.xlsx</strong> / <strong>.xls</strong> /
+          <strong>.csv</strong> / <strong>.tsv</strong></p>
+        <div class="file-name-display" id="fileNameDisplay"></div>
+        <input type="file" name="file" id="fileInput" accept=".xlsx,.xls,.csv,.tsv,.txt" required />
+      </div>
+
+      <button type="submit" class="btn-upload" id="submitBtn">
+        🚀 &nbsp; Analyse Dataset
+      </button>
+
+    </form>
+  </div>
+
+  <!-- Feature badges -->
+  <div class="upload-features">
+    <span class="feature-badge">🎯 RFM Segmentation</span>
+    <span class="feature-badge">📈 Sales Forecasting</span>
+    <span class="feature-badge">🔮 Churn Prediction</span>
+    <span class="feature-badge">📊 6 Auto Charts</span>
+    <span class="feature-badge">🤖 K-Means + Regression</span>
+    <span class="feature-badge">📄 CSV / XLSX / TSV</span>
+  </div>
+
+  <script>
+    const zone = document.getElementById('dropZone');
+    const input = document.getElementById('fileInput');
+    const label = document.getElementById('fileNameDisplay');
+    const btn = document.getElementById('submitBtn');
+    const form = document.getElementById('uploadForm');
+
+    input.addEventListener('change', () => {
+      if (input.files[0]) label.textContent = '📎 ' + input.files[0].name;
+    });
+
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        input.files = e.dataTransfer.files;
+        label.textContent = '📎 ' + e.dataTransfer.files[0].name;
+      }
+    });
+
+    form.addEventListener('submit', () => {
+      btn.textContent = '⏳  Processing… this may take a minute';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+    });
+  </script>
+</body>
+
+</html>

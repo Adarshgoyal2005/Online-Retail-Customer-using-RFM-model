@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RetailML – Analysis Results</title>
+  <meta name="description"
+    content="Customer analytics summary — RFM segmentation results, churn statistics, and sales prediction overview." />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body style="background:var(--bg);">
+
+  <!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <span class="navbar-brand gradient-text">⚡ RetailML</span>
+    <span class="navbar-file">📄 {{ filename }}</span>
+  </nav>
+
+  <div class="dashboard-wrap">
+
+    <!-- ── Top Navigation Buttons ─────────────────────────────────────────────── -->
+    <div class="nav-actions">
+      <a href="/" class="btn-back" id="btnUploadNew">← Upload New File</a>
+      <a href="/dashboard" class="btn-view-dashboard" id="btnViewDashboard">📊 &nbsp; View Charts &amp; Dashboard →</a>
+    </div>
+
+    <h1 class="page-title gradient-text">Analysis Results</h1>
+    <p class="page-desc">Your retail dataset has been processed — here's the full summary below.</p>
+
+    <!-- ── Detected Columns Banner ─────────────────────────────────────────────── -->
+    {% if detected_cols %}
+    <div class="detected-banner">
+      <span class="detected-label">🔍 Auto-detected columns:</span>
+      {% for role, col in detected_cols.items() %}
+      <span class="detected-tag">
+        <span class="detected-role">{{ role }}:</span>
+        <span class="detected-col">{{ col }}</span>
+      </span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ── KPI Stat Cards ──────────────────────────────────────────────────────── -->
+    <h2 class="section-title"><span>📊</span> Key Performance Indicators</h2>
+    <div class="stats-grid">
+      <div class="stat-card purple">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Unique Customers</div>
+        <div class="stat-value">{{ "{:,}".format(stats.total_customers) }}</div>
+        <div class="stat-sub">from {{ "{:,}".format(stats.total_transactions) }} transactions</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-icon">💷</div>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">£{{ "{:,.0f}".format(stats.total_revenue) }}</div>
+        <div class="stat-sub">full dataset</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">📈</div>
+        <div class="stat-label">Next Month Forecast</div>
+        <div class="stat-value">£{{ "{:,.0f}".format(stats.next_month_sales) }}</div>
+        <div class="stat-sub">R² = {{ stats.r2_score }}</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-label">Churn Risk</div>
+        <div class="stat-value">{{ stats.churn_pct }}%</div>
+        <div class="stat-sub">recency &gt; {{ churn_data.threshold_days }} days</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-label">Active Customers</div>
+        <div class="stat-value">{{ "{:,}".format(churn_data.active_count) }}</div>
+        <div class="stat-sub">{{ "{:,}".format(churn_data.churn_count) }} at risk</div>
+      </div>
+    </div>
+
+    <!-- ── Model Accuracy Summary ──────────────────────────────────────────────── -->
+    <h2 class="section-title"><span>🤖</span> Model Accuracy Overview</h2>
+    <div class="model-badges">
+      <div class="model-badge">
+        <div class="badge-icon">📉</div>
+        <div>
+          <div class="badge-label">Logistic Regression</div>
+          <div class="badge-value green">{{ stats.lr_accuracy }}%</div>
+          <div style="font-size:.75rem;color:var(--muted);">Churn accuracy</div>
+        </div>
+      </div>
+      <div class="model-badge">
+        <div class="badge-icon">🌳</div>
+        <div>
+          <div class="badge-label">Decision Tree</div>
+          <div class="badge-value cyan">{{ stats.dt_accuracy }}%</div>
+          <div style="font-size:.75rem;color:var(--muted);">Churn accuracy</div>
+        </div>
+      </div>
+      <div class="model-badge">
+        <div class="badge-icon">📐</div>
+        <div>
+          <div class="badge-label">Linear Regression R²</div>
+          <div class="badge-value amber">{{ stats.r2_score }}</div>
+          <div style="font-size:.75rem;color:var(--muted);">Sales model fit</div>
+        </div>
+      </div>
+      <div class="model-badge">
+        <div class="badge-icon">🔵</div>
+        <div>
+          <div class="badge-label">K-Means Clusters</div>
+          <div class="badge-value" style="color:var(--purple-lt);">4</div>
+          <div style="font-size:.75rem;color:var(--muted);">RFM segments</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Customer Segments ───────────────────────────────────────────────────── -->
+    <h2 class="section-title">
+      <span>🎯</span> Customer Segments
+      <small style="font-weight:400;font-size:.8rem;color:var(--muted);margin-left:auto;">K-Means (4 clusters)</small>
+    </h2>
+    <div class="seg-summary-grid">
+      {% for s in seg_summary %}
+      <div class="seg-card">
+        <div class="seg-card-count gradient-text">{{ s.count }}</div>
+        <div class="seg-card-name">{{ s.segment }}</div>
+        <div class="seg-card-pct">{{ s.pct }}% of customers</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ── Top 20 Customers Table ──────────────────────────────────────────────── -->
+    <h2 class="section-title"><span>👑</span> Top 20 Customers by Revenue</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer ID</th>
+            <th>Recency (days)</th>
+            <th>Frequency</th>
+            <th>Monetary (£)</th>
+            <th>Segment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i, c in enumerate(top_customers) %}
+          <tr>
+            <td style="color:var(--muted);">{{ i + 1 }}</td>
+            <td>{{ c['Customer ID'] | int }}</td>
+            <td>{{ c.Recency }}</td>
+            <td>{{ c.Frequency }}</td>
+            <td>£{{ "{:,.2f}".format(c.Monetary) }}</td>
+            <td>
+              {% set seg = c.Segment %}
+              {% if 'High' in seg %}
+              <span class="seg-pill high">{{ seg }}</span>
+              {% elif 'Loyal' in seg %}
+              <span class="seg-pill loyal">{{ seg }}</span>
+              {% elif 'Potential' in seg %}
+              <span class="seg-pill potential">{{ seg }}</span>
+              {% else %}
+              <span class="seg-pill low">{{ seg }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Bottom CTA ──────────────────────────────────────────────────────────── -->
+    <div class="bottom-cta">
+      <p>Want to explore the charts and visualisations?</p>
+      <a href="/dashboard" class="btn-view-dashboard" id="btnViewDashboardBottom">
+        📊 &nbsp; Open Full Dashboard →
+      </a>
+    </div>
+
+  </div><!-- dashboard-wrap -->
+
+</body>
+
+</html>
